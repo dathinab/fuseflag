@@ -1,0 +1,6 @@
+[package]
+name = "fuseflag"
+version = "0.1.0"
+authors = ["Philipp korber <philippkorber@gmail.com>"]
+
+[dependencies]
