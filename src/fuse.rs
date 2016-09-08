@@ -2,13 +2,14 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 
-/// Represents a (not resetable) fuse flag which can be shared between different threads.
+/// Represents a (not resettable) fuse/flag which can be shared between different threads.
 ///
 ///
 /// # Note
-/// given that FuseFlag is only meant for a lose coupling between threads
-/// (e.g. to give a thread a signal to stop doing it's background job "somtime"
-/// in the future) it is not necessary suited as a tool for synchronisation.
+/// given that `FuseFlag` is only meant for a lose coupling between threads
+/// (e.g. to give a thread a signal to stop doing it's background job "sometime"
+/// in the future) it is not necessary suited as a tool for synchronisation and
+/// uses the relaxed memory ordering.
 #[derive(Clone, Debug)]
 pub struct FuseFlag(Arc<AtomicBool>);
 
@@ -31,11 +32,7 @@ impl FuseFlag {
     }
 
 
-    //TODO refresh your MemoryOrdering knowled and consider if Relaxed is the best choice
-    // (Aquire/Release) might also be a good choice, also you have to fill in the documentation
-    // corresponding to your choice
     /// burns the fuse, from then check will return false
-    /// be aware that memory ordering Relaxed is used
     pub fn burn(&self) {
         self.0.store(false, Ordering::Relaxed)
     }
@@ -57,13 +54,14 @@ mod tests {
 
     fn not(bl: bool) -> bool { !bl }
 
+    //NOTE: st_ is for single threaded test
     #[test]
     fn has_default() {
         assert!(FuseFlag::default().check());
     }
 
     #[test]
-    fn st_check_burn_check() {
+    fn single_thread_check_burn_check() {
         let fuse = FuseFlag::new();
         assert!(fuse.check());
         fuse.burn();
@@ -71,7 +69,7 @@ mod tests {
     }
 
     #[test]
-    fn st_burn_burn() {
+    fn single_thread_burn_burn() {
         let fuse = FuseFlag::new();
         fuse.burn();
         fuse.burn();
@@ -79,7 +77,7 @@ mod tests {
     }
 
     #[test]
-    fn mt_check() {
+    fn multi_thread_check() {
         let fuse = FuseFlag::new();
         let th_fuse = fuse.clone();
 
@@ -107,7 +105,7 @@ mod tests {
     }
 
     #[test]
-    fn mt_burn() {
+    fn multi_thread_burn() {
         let fuse = FuseFlag::new();
 
         let guard = wait_for_fuse_burn(fuse.clone());
@@ -120,7 +118,7 @@ mod tests {
     }
 
     #[test]
-    fn mt_pair() {
+    fn multi_thread_pair() {
         let (fuse_check, fuse) = FuseFlag::new_pair();
 
         let guard = wait_for_fuse_burn(fuse_check);

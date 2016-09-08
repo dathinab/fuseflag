@@ -33,6 +33,9 @@
 //! ```
 //!
 
+#![cfg_attr(feature="clippy", feature(plugin))]
+#![cfg_attr(feature="clippy", plugin(clippy))]
+
 //reexport actual api
 pub use self::fused_spawn::{StopThreadFuse, fused_spawn};
 pub use self::fuse::FuseFlag;

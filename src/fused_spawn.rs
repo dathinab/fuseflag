@@ -5,10 +5,10 @@ use std::convert::Into;
 use super::fuse::FuseFlag;
 
 
-/// A StopThreadFuse combines a fuse and a `thread::JoinHandle`.
+/// A `StopThreadFuse` combines a fuse and a `thread::JoinHandle`.
 ///
 /// When calling `join` on this struct the contained fuse is burned
-/// befor calling the JoinHandle's join. The burining of the fuse
+/// befor calling the `JoinHandle`'s join. The burining of the fuse
 /// _might_ signal the thread that this thread seams to be waiting for
 /// it, so that it can terminate softly.
 pub struct StopThreadFuse<T> {

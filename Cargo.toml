@@ -2,5 +2,14 @@
 name = "fuseflag"
 version = "0.1.0"
 authors = ["Philipp korber <philippkorber@gmail.com>"]
+license = "MIT/Apache-2.0"
+description = "A (not resettable) fuse/flag which can be shared between different threads"
+repository = "https://github.com/dathinab/fuseflag"
+readme = "./README.md"
+keywords = ["fuseflag", "fuse"]
+
+[features]
+default = []
 
 [dependencies]
+clippy = {version = "*", optional = true}
