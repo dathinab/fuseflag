@@ -1,5 +1,5 @@
 
-# fuseflag &emsp;
+# fuseflag &emsp; [![Build Status](https://travis-ci.org/dathinab/fuseflag.svg?branch=master)](https://travis-ci.org/dathinab/fuseflag)
 
 **A (not resettable) fuse/flag which can be shared between different threads**
 
