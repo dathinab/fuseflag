@@ -93,15 +93,25 @@ pub fn fused_spawn<F, R>(func: F) -> StopThreadFuse<R>
 
 #[cfg(test)]
 mod tests {
+    use std::sync::mpsc::channel;
     use std::thread::yield_now;
     use std::time::Instant;
-    use super::fused_spawn;
+    use super::{fused_spawn, StopThreadFuse};
 
-    #[test]
-    fn test_fused_spawn() {
+    /// spawns a therad waiting to be canceld through the
+    /// fuse contained in the returned `StopThreadFuse`
+    /// The thread has a timeout of ~2s. If the timeout
+    /// is reached it will cancel anyway but the return
+    /// value of the thread will be `false` instead of `true`.
+    /// Note that this function assures that it will only return
+    /// after the thread did start.
+    fn use_fuse_spawn_overhead() -> StopThreadFuse<bool> {
+        let (send, recv) = channel();
         let guard = fused_spawn(move |req_end_fuse| {
             let then = Instant::now();
             while req_end_fuse.check() {
+                //might fail sending after the first time
+                let _ = send.send(());
                 yield_now();
                 if then.elapsed().as_secs() > 1 {
                     return false;
@@ -109,9 +119,27 @@ mod tests {
             }
             true
         });
+        //make sure thread did start
+        recv.recv().unwrap();
+        guard
+    }
 
+    #[test]
+    fn test_fused_spawn() {
+        let guard = use_fuse_spawn_overhead();
         let had_no_timeout = guard.stop_and_join().expect("the waiting thread not to fail");
         assert!(had_no_timeout);
-
     }
+
+    #[test]
+    fn test_fused_spawn_parts() {
+        let (flag, handl) = use_fuse_spawn_overhead().into();
+        flag.burn();
+        let had_no_timeout = handl.join().expect("the waiting thread not to fail");
+        assert!(had_no_timeout);
+    }
+
+
+
+
 }

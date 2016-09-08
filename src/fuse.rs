@@ -47,7 +47,7 @@ impl Default for FuseFlag {
 
 #[cfg(test)]
 mod tests {
-
+    use std::sync::mpsc::channel;
     use std::time::Instant;
     use std::thread::{spawn, yield_now, JoinHandle};
     use super::FuseFlag;
@@ -92,16 +92,22 @@ mod tests {
 
     fn wait_for_fuse_burn(fuse_check: FuseFlag) -> JoinHandle<bool> {
         assert!(fuse_check.check());
-        spawn(move || {
+        let (send, recv) = channel();
+        let result = spawn(move || {
             let then = Instant::now();
             while fuse_check.check() {
+                //might fail after the first time
+                let _ = send.send(());
                 yield_now();
                 if then.elapsed().as_secs() > 1 {
                     return false;
                 }
             }
             true
-        })
+        });
+        //make sure thread did start
+        recv.recv().unwrap();
+        result
     }
 
     #[test]
