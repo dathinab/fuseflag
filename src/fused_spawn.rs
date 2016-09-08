@@ -11,6 +11,7 @@ use super::fuse::FuseFlag;
 /// befor calling the `JoinHandle`'s join. The burining of the fuse
 /// _might_ signal the thread that this thread seams to be waiting for
 /// it, so that it can terminate softly.
+#[must_use]
 pub struct StopThreadFuse<T> {
     fuse: FuseFlag,
     join_handle: JoinHandle<T>
