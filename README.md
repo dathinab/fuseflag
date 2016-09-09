@@ -10,7 +10,7 @@ The Fuse/Flag can be checked and burned, once burned it cannot be restored.
 
 A additional functionality is a wrapper around `thread::spawn` which takes a closure
 expecting a `FuseFlag` as single parameter and returns a Wrapper  around `JoinHandle`
-which burns the fuse befor calling join.
+which burns the fuse before calling join.
 
 ## Example
 
